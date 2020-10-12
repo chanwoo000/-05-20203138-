@@ -1,0 +1,131 @@
+import pickle
+import sys
+from PyQt5.QtWidgets import (QWidget, QPushButton,
+    QHBoxLayout, QVBoxLayout, QApplication, QLabel,
+    QComboBox, QTextEdit, QLineEdit)
+from PyQt5.QtCore import Qt
+
+
+class ScoreDB(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+        self.dbfilename = 'assignment6.dat'
+        self.scoredb = []
+        self.readScoreDB()
+        #self.showScoreDB()
+
+
+    def initUI(self):
+        self.ResultEdit = QTextEdit()
+
+        # 첫번쨋 줄 라벨 만들어 주기
+        Name = QLabel('NAME :')
+        Age = QLabel('AGE :')
+        Score = QLabel('SCORE :')
+
+        # 각 라벨의 입력값 넣을 수 있는 칸 만들기
+        NameEdit = QLineEdit("",self)
+        AgeEdit = QLineEdit("",self)
+        ScoreEdit = QLineEdit("",self)
+
+        # 위에 만든 것들 한줄에 넣기
+        hbox = QHBoxLayout()
+        hbox.addWidget(Name)
+        hbox.addWidget(NameEdit)
+        hbox.addWidget(Age)
+        hbox.addWidget(AgeEdit)
+        hbox.addWidget(Score)
+        hbox.addWidget(ScoreEdit)
+
+        vbox = QVBoxLayout()
+        vbox.addLayout(hbox)
+
+        # 두 번쨋 줄 라벨과 입력칸 만들기
+        Amount = QLabel('AMOUNT :')
+        Key = QLabel('KEY :')
+        AmountEdit = QLineEdit("",self)
+        KeyComboBox = QComboBox()
+        KeyComboBox.addItems(["Name", "Age", "Score"])
+
+        # 한줄에 넣기
+        hbox = QHBoxLayout()
+        hbox.addStretch()
+        hbox.addWidget(Amount)
+        hbox.addWidget(AmountEdit)
+        hbox.addWidget(Key)
+        hbox.addWidget(KeyComboBox)
+
+        vbox.addLayout(hbox)
+
+        # 각 버튼 만들기
+        Add = QPushButton("Add",self)
+        Del = QPushButton("Del",self)
+        Find = QPushButton("Find",self)
+        Inc = QPushButton("Inc",self)
+        Show = QPushButton("Show",self)
+
+
+
+        Add.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Add " ))
+        Del.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Del " ))
+        Find.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Find " ))
+        Inc.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Inc " ))
+        Show.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Show "))
+
+        hbox = QHBoxLayout()
+        hbox.addStretch()
+        hbox.addWidget(Add)
+        hbox.addWidget(Del)
+        hbox.addWidget(Find)
+        hbox.addWidget(Inc)
+        hbox.addWidget(Show)
+
+
+        vbox.addLayout(hbox)
+
+        # 결과값 라벨
+        Result = QLabel('RESULT :')
+
+        # 결과값 출력할 박스
+        hbox = QHBoxLayout()
+        vbox.addWidget(Result)
+        hbox.addWidget(self.ResultEdit)
+
+        vbox.addLayout(hbox)
+
+
+        self.setLayout(vbox)
+
+        # 윈도우 시작 픽셀 위치와 가로,세로 픽셀크기 + 윈도우 타이틀
+        self.setGeometry(300, 300, 500, 250)
+        self.setWindowTitle('Assignment6')
+        self.show()
+
+
+
+    def closeEvent(self, event):
+        self.writeScoreDB()
+
+    def readScoreDB(self):
+        try:
+            fH = open(self.dbfilename, 'rb')
+        except FileNotFoundError as e:
+            self.scoredb = []
+            return
+
+        try:
+            self.scoredb =  pickle.load(fH)
+        except:
+            pass
+        else:
+            pass
+        fH.close()
+
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = ScoreDB()
+    sys.exit(app.exec_())
