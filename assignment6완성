@@ -1,0 +1,153 @@
+import pickle
+import sys
+from PyQt5.QtWidgets import (QWidget, QPushButton,
+    QHBoxLayout, QVBoxLayout, QApplication, QLabel,
+    QComboBox, QTextEdit, QLineEdit)
+from PyQt5.QtCore import Qt
+
+
+class ScoreDB(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+        self.dbfilename = 'assignment6.dat'
+        self.scoredb = []
+        self.readScoreDB()
+        self.showScoreDB()
+
+
+    def initUI(self):
+        self.ResultEdit = QTextEdit()
+
+        # 첫번쨋 줄 라벨 만들어 주기
+        Name = QLabel('NAME :')
+        Age = QLabel('AGE :')
+        Score = QLabel('SCORE :')
+
+        # 각 라벨의 입력값 넣을 수 있는 칸 만들기
+        NameEdit = QLineEdit("",self)
+        AgeEdit = QLineEdit("",self)
+        ScoreEdit = QLineEdit("",self)
+
+        # 위에 만든 것들 한줄에 넣기
+        hbox = QHBoxLayout()
+        hbox.addWidget(Name)
+        hbox.addWidget(NameEdit)
+        hbox.addWidget(Age)
+        hbox.addWidget(AgeEdit)
+        hbox.addWidget(Score)
+        hbox.addWidget(ScoreEdit)
+
+        vbox = QVBoxLayout()
+        vbox.addLayout(hbox)
+
+        # 두 번쨋 줄 라벨과 입력칸 만들기
+        Amount = QLabel('AMOUNT :')
+        Key = QLabel('KEY :')
+        AmountEdit = QLineEdit("",self)
+        KeyComboBox = QComboBox()
+        KeyComboBox.addItems(["Name", "Age", "Score"])
+
+        # 한줄에 넣기
+        hbox = QHBoxLayout()
+        hbox.addStretch()
+        hbox.addWidget(Amount)
+        hbox.addWidget(AmountEdit)
+        hbox.addWidget(Key)
+        hbox.addWidget(KeyComboBox)
+
+        vbox.addLayout(hbox)
+
+        # 각 버튼 만들기
+        Add = QPushButton("Add",self)
+        Del = QPushButton("Del",self)
+        Find = QPushButton("Find",self)
+        Inc = QPushButton("Inc",self)
+        Show = QPushButton("Show",self)
+
+
+        # 버튼 클릭 되었을 때 버튼 클릭드 함수랑 연결하기
+        Add.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Add " + NameEdit.text() + " " + AgeEdit.text() + " " + ScoreEdit.text()))
+        Del.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Del " + NameEdit.text()))
+        Find.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Find " + NameEdit.text()))
+        Inc.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Inc " + NameEdit.text() + " " + AmountEdit.text()))
+        Show.clicked.connect(lambda: self.buttonClicked(self.scoredb, "Show " + KeyComboBox.currentText()))
+
+        hbox = QHBoxLayout()
+        hbox.addStretch()
+        hbox.addWidget(Add)
+        hbox.addWidget(Del)
+        hbox.addWidget(Find)
+        hbox.addWidget(Inc)
+        hbox.addWidget(Show)
+
+
+        vbox.addLayout(hbox)
+
+        # 결과값 라벨
+        Result = QLabel('RESULT :')
+
+        # 결과값 출력할 박스
+        hbox = QHBoxLayout()
+        vbox.addWidget(Result)
+        hbox.addWidget(self.ResultEdit)
+
+        vbox.addLayout(hbox)
+
+
+        self.setLayout(vbox)
+
+        # 윈도우 시작 픽셀 위치와 가로,세로 픽셀크기 + 윈도우 타이틀
+        self.setGeometry(300, 300, 500, 250)
+        self.setWindowTitle('assignment6')
+        self.show()
+
+
+
+    def closeEvent(self, event):
+        self.writeScoreDB()
+
+    def readScoreDB(self):
+        try:
+            fH = open(self.dbfilename, 'rb')
+        except FileNotFoundError as e:
+            self.scoredb = []
+            return
+
+        try:
+            self.scoredb =  pickle.load(fH)
+        except:
+            pass
+        else:
+            pass
+        fH.close()
+
+
+    # write the data into person db
+    def writeScoreDB(self):
+        fH = open(self.dbfilename, 'wb')
+        pickle.dump(self.scoredb, fH)
+        fH.close()
+
+
+    def showScoreDB(self, keyname="Name"):
+        result_str = ""
+        for p in sorted(self.scoredb, key=lambda person: person[keyname]):
+            for attr in sorted(p):
+                result_str += (attr + "=" + str(p[attr]) + "    ")
+            result_str += '\n'
+        self.ResultEdit.setText(result_str)
+
+    def buttonClicked(self, scoredb, inputstr):
+        button = self.sender()
+        key = button.text()
+        parse = inputstr.split(" ")
+
+
+        # 각 버튼 함수
+        if key == "Add":
+            if(parse[1] and parse[2] and parse[3]):
+                record = {'Name': parse[1], 'Age': int(parse[2]), 'Score': int(parse[3])}
+                scoredb += [record]
+                self.showScoreDB()
