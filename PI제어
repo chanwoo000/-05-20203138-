@@ -27,7 +27,7 @@
 
 Servo myservo;
 
-float dist_target; // location to send the ball
+float dist_target; 
 float dist_raw;
 float dist_ema=0; 
 float samples_num = 3;  
